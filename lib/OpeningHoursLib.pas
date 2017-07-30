@@ -26,6 +26,7 @@ type
     procedure Add(open, close: TTime);
     function ToTimeString: String;
     function IsSame(value: TOpeningHourList): Boolean;
+    procedure Sort;
 
     property HourList: TObjectList<TOpeningSpan> read FHourList;
   end;
@@ -55,6 +56,7 @@ type
   private
     FDayList: TObjectList<TOpeningDay>;
     function getDayOpening(day: TDay): TOpeningDay;
+    procedure SortDayList;
   public
     constructor Create;
     destructor Destroy;override;
@@ -68,7 +70,7 @@ type
 implementation
 
 uses
-  System.DateUtils;
+  System.DateUtils, System.Generics.Defaults, System.Math;
 
 { TOpeningHoursList }
 
@@ -112,6 +114,22 @@ begin
   end;
 end;
 
+procedure TOpeningList.SortDayList;
+var
+  day: TOpeningDay;
+begin
+  FDayList.Sort(TComparer<TOpeningDay>.Construct(
+    function (const Day1, day2: TOpeningDay): Integer
+    begin
+      Result := CompareValue(Integer(day1.Day), Integer(day2.Day));
+    end));
+
+  for day in FDayList do
+  begin
+    day.Sort;
+  end;
+end;
+
 function TOpeningList.ToConsolidatedText: String;
 var
   day: TOpeningDay;
@@ -133,6 +151,7 @@ var
     Result := Result + dayText + ' '+currentHours.ToTimeString;
   end;
 begin
+  SortDayList;
   currentDays := TList<TDay>.Create;
   
   currentHours := nil;
@@ -159,7 +178,7 @@ begin
     end;
   end;
 
-  AppendText;
+  if currentHours <> nil then AppendText;
 
   currentDays.Free;
 end;
@@ -171,6 +190,7 @@ var
   cList: TConsolidatedList;
   added: Boolean;
 begin
+  SortDayList;
   lists := TObjectList<TConsolidatedList>.Create;
   for openDay in FDayList do
   begin
@@ -207,6 +227,7 @@ var
   day: TOpeningDay;
 begin
   Result := '';
+  SortDayList;
   for day in FDayList do
   begin
     if Result <> '' then Result := Result +#13#10;
@@ -295,6 +316,17 @@ begin
       break;
     end;
   end;
+end;
+
+procedure TOpeningHourList.Sort;
+begin
+  FHourList.Sort(TComparer<TOpeningSpan>.Construct(
+      function(const span1, span2: TOpeningSpan): Integer
+      begin
+        Result := CompareTime(span1.OpenTime, span2.OpenTime);
+        if Result = 0 then Result := CompareTime(span1.CloseTime, span2.CloseTime);
+      end
+    ));
 end;
 
 function TOpeningHourList.ToTimeString: String;

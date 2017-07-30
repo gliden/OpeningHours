@@ -115,3 +115,4 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+tests/Win32/Debug/dunit.ini
