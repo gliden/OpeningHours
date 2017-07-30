@@ -43,6 +43,7 @@ type
   TConsolidatedList = class(TOpeningHourList)
   private
     FDays: TList<TDay>;
+    function DayRangeToString(StartIdx, EndIdx: Integer): String;
   public
     constructor Create;
     destructor Destroy;override;
@@ -360,6 +361,21 @@ begin
   FDays := TList<TDay>.Create;
 end;
 
+function TConsolidatedList.DayRangeToString(StartIdx, EndIdx: Integer): String;
+var
+  joinStr: string;
+begin
+  if EndIdx = -1 then
+  begin
+    Result := TDay.IndexToDay(StartIdx).ToShortDayName;
+  end else
+  begin
+    joinStr := ' - ';
+    if EndIdx-StartIdx = 1 then joinStr := ', ';
+    Result := TDay.IndexToDay(StartIdx).ToShortDayName + joinStr + TDay.IndexToDay(EndIdx).ToShortDayName;
+  end;
+end;
+
 destructor TConsolidatedList.Destroy;
 begin
   FDays.Free;
@@ -370,14 +386,41 @@ function TConsolidatedList.ToString: String;
 var
   dayStr: string;
   day: TDay;
+  startDay: Integer;
+  expecetedDay: Integer;
+  endDay: Integer;
 begin
   Result := '';
   dayStr := '';
+
+  if FDays.Count = 0 then exit;
+
+  startDay := -1;
+  expecetedDay := -1;
+  endDay := -1;
   for day in FDays do
   begin
-    if dayStr <> '' then dayStr := dayStr+', ';
-    dayStr := dayStr + day.ToShortDayName;
+    if startDay = -1 then
+    begin
+      startDay := day.ToDayIndex;
+      expecetedDay := startDay + 1;
+    end else
+    if day.ToDayIndex = expecetedDay then
+    begin
+      endDay := expecetedDay;
+      expecetedDay := expecetedDay + 1;
+    end else
+    begin
+      if dayStr <> '' then dayStr := dayStr + ', ';
+      dayStr := dayStr + DayRangeToString(startDay, endDay);
+      startDay := Day.ToDayIndex;
+      expecetedDay := startDay + 1;
+      endDay := -1;
+    end;
   end;
+
+  if dayStr <> '' then dayStr := dayStr + ', ';
+  dayStr := dayStr + DayRangeToString(startDay, endDay);
   Result := dayStr + ': ' + ToTimeString;
 end;
 

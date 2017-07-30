@@ -28,6 +28,7 @@ type
     procedure TestToString;
     procedure TestToConsolidatedText;
     procedure TestToSmallList;
+    procedure TestTConsolidatedList;
   end;
 
 implementation
@@ -62,6 +63,51 @@ begin
   ReturnValue := FOpeningList.ToString;
 
   CheckEquals('Montag: 08:00 - 12:30 / 13:00 - 18:00'+#13#10+'Dienstag: 08:00 - 12:30 / 13:00 - 18:00'+#13#10+'Mittwoch: 08:00 - 14:00'+#13#10+'Donnerstag: 08:00 - 12:30 / 13:00 - 18:00'+#13#10+'Freitag: 08:00 - 12:30 / 13:00 - 18:00'+#13#10+'Samstag: 10:00 - 14:00'+#13#10+'Sonntag: 10:00 - 14:00', ReturnValue);
+end;
+
+procedure TestTOpeningList.TestTConsolidatedList;
+var
+  list: TConsolidatedList;
+begin
+  list := TConsolidatedList.Create;
+  try
+    list.Add(StrToTime('08:00'), StrToTime('18:00'));
+    list.Days.Add(TDay.Monday);
+    list.Days.Add(TDay.Tuesday);
+    list.Days.Add(TDay.Wednesday);
+
+    CheckEquals('Mo - Mi: 08:00 - 18:00', list.ToString, 'Mo - Mi');
+
+    list.Days.Clear;
+    list.Days.Add(TDay.Monday);
+    list.Days.Add(TDay.Tuesday);
+    list.Days.Add(TDay.Thursday);
+    list.Days.Add(TDay.Friday);
+
+    CheckEquals('Mo, Di, Do, Fr: 08:00 - 18:00', list.ToString, 'Mo, Di, Do, Fr');
+
+    list.Days.Clear;
+    list.Days.Add(TDay.Monday);
+    list.Days.Add(TDay.Tuesday);
+    list.Days.Add(TDay.Thursday);
+
+    CheckEquals('Mo, Di, Do: 08:00 - 18:00', list.ToString, 'Mo, Di, Do');
+
+    list.Days.Clear;
+    list.Days.Add(TDay.Monday);
+    list.Days.Add(TDay.Wednesday);
+    list.Days.Add(TDay.Thursday);
+    list.Days.Add(TDay.Friday);
+    list.Days.Add(TDay.Saturday);
+    list.Days.Add(TDay.Sunday);
+
+    CheckEquals('Mo, Mi - So: 08:00 - 18:00', list.ToString, 'Mo, Mi - So');
+
+    list.Days.Clear;
+    CheckEquals('', list.ToString, 'Leer');
+  finally
+    list.Free;
+  end;
 end;
 
 procedure TestTOpeningList.TestToConsolidatedText;
