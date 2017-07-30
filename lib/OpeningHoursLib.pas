@@ -387,7 +387,7 @@ var
   dayStr: string;
   day: TDay;
   startDay: Integer;
-  expecetedDay: Integer;
+  expectedDay: Integer;
   endDay: Integer;
 begin
   Result := '';
@@ -396,25 +396,25 @@ begin
   if FDays.Count = 0 then exit;
 
   startDay := -1;
-  expecetedDay := -1;
+  expectedDay := -1;
   endDay := -1;
   for day in FDays do
   begin
     if startDay = -1 then
     begin
       startDay := day.ToDayIndex;
-      expecetedDay := startDay + 1;
+      expectedDay := startDay + 1;
     end else
-    if day.ToDayIndex = expecetedDay then
+    if day.ToDayIndex = expectedDay then
     begin
-      endDay := expecetedDay;
-      expecetedDay := expecetedDay + 1;
+      endDay := expectedDay;
+      expectedDay := expectedDay + 1;
     end else
     begin
       if dayStr <> '' then dayStr := dayStr + ', ';
       dayStr := dayStr + DayRangeToString(startDay, endDay);
       startDay := Day.ToDayIndex;
-      expecetedDay := startDay + 1;
+      expectedDay := startDay + 1;
       endDay := -1;
     end;
   end;
