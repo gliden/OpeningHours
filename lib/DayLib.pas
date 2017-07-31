@@ -9,6 +9,7 @@ type
     function ToDayIndex: Integer;
     function ToDayName: String;
     function ToShortDayName: String;
+    function ToEnglishSortDayName:String;
     class function IndexToDay(index: Integer): TDay; static;
   end;
 
@@ -58,6 +59,19 @@ begin
     Saturday  : Result := FormatSettings.LongDayNames[7];
     Sunday    : Result := FormatSettings.LongDayNames[1];
     else raise Exception.Create('Unknown Day');
+  end;
+end;
+
+function TDayHelper.ToEnglishSortDayName: String;
+begin
+  case Self of
+    Monday    : Result := 'Mo';
+    Tuesday   : Result := 'Tu';
+    Wednesday : Result := 'We';
+    Thursday  : Result := 'Th';
+    Friday    : Result := 'Fr';
+    Saturday  : Result := 'Sa';
+    Sunday    : Result := 'Su';
   end;
 end;
 

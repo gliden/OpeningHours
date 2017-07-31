@@ -66,6 +66,8 @@ type
     function ToConsolidatedText: String;
     function ToSmallList: string;
     procedure Add(Day: TDay; open, close: TTime);
+
+    property DayList: TObjectList<TOpeningDay> read FDayList;
   end;
 
 implementation
